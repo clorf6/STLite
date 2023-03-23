@@ -12,6 +12,25 @@
 
 namespace sjtu {
 
+    template<typename U>
+    struct my_type_traits {
+        using iterator_assignable = typename U::iterator_assignable;
+    };
+
+    struct my_true_type {
+        static constexpr bool value = true;
+    };
+
+    struct my_false_type {
+        static constexpr bool value = false;
+    };
+
+    template<typename T, typename U>
+    struct my_is_same : my_false_type {};
+
+    template<typename T>
+    struct my_is_same<T, T> : my_true_type {};
+
     template<
             class Key,
             class T,
@@ -32,6 +51,7 @@ namespace sjtu {
          *     like it = map.begin(); --it;
          *       or it = map.end(); ++end();
          */
+
         enum color : bool {
             BLACK = false, RED = true
         };
@@ -61,6 +81,7 @@ namespace sjtu {
         Node *maxx;
         int siz;
 
+        class iterator;
         class const_iterator;
 
         class iterator {
@@ -75,6 +96,8 @@ namespace sjtu {
             const map<Key, T, Compare> *bel;
 
         public:
+            using iterator_assignable = my_true_type;
+
             iterator() {
                 // TODO
                 now = nullptr;
@@ -171,6 +194,8 @@ namespace sjtu {
             Node *now;
             const map<Key, T, Compare> *bel;
         public:
+            using iterator_assignable = my_false_type;
+
             const_iterator() {
                 // TODO
                 now = nullptr;
@@ -576,10 +601,12 @@ namespace sjtu {
             } else root = rt;
             rt->fa = f;
             Insert_fix(rt);
-            minn = root;
-            while (minn->ch[0] != nullNode) minn = minn->ch[0];
-            maxx = root;
-            while (maxx->ch[1] != nullNode) maxx = maxx->ch[1];
+            if (minn == nullNode || Compare()(value.first, minn->val->first)) {
+                minn = rt;
+            }
+            if (maxx == nullNode || Compare()(maxx->val->first, value.first)) {
+                maxx = rt;
+            }
             return pair(iterator(rt, this), true);
         }
 
@@ -648,6 +675,7 @@ namespace sjtu {
             if (pos.bel != this) throw runtime_error();
             Node *rt = pos.now;
             if (rt == nullNode) throw runtime_error();
+            const Key value = rt->val->first;
             Node *suc = rt;
             if (suc->ch[0] != nullNode && suc->ch[1] != nullNode) {
                 suc = rt->ch[1];
@@ -671,13 +699,17 @@ namespace sjtu {
             if (suc->fa == nullNode) root = suc_son;
             else suc->fa->ch[Dir(suc)] = suc_son;
             if (!suc->col) Remove_fix(suc_son);
-            siz--;;
+            siz--;
+            if (minn == nullNode || (!Compare()(minn->val->first, value))) {
+                minn = root;
+                while (minn->ch[0] != nullNode) minn = minn->ch[0];
+            }
+            if (maxx == nullNode || (!Compare()(value, maxx->val->first))) {
+                maxx = root;
+                while (maxx->ch[1] != nullNode) maxx = maxx->ch[1];
+            }
             delete suc;
             suc = nullNode;
-            minn = root;
-            while (minn->ch[0] != nullNode) minn = minn->ch[0];
-            maxx = root;
-            while (maxx->ch[1] != nullNode) maxx = maxx->ch[1];
         }
 
         /**
@@ -688,7 +720,6 @@ namespace sjtu {
          * The default method of check the equivalence is !(a < b || b > a)
          */
         size_t count(const Key &key) const {
-            //printf("count\n");
             Node *rt = root;
             while (rt != nullNode) {
                 value_type &now = *(rt->val);
