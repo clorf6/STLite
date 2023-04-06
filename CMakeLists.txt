@@ -15,4 +15,4 @@ add_compile_options(-fmax-errors=10 -O2 -DONLINE_JUDGE -lm -std=c++17)
 
 add_executable(vector vector/data/one/code.cpp)
 add_executable(priority_queue priority_queue/data/one/code.cpp)
-add_executable(map map/data/one/code.cpp)
+add_executable(map map/src/type_traits_test.cpp)

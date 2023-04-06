@@ -26,10 +26,12 @@ namespace sjtu {
     };
 
     template<typename T, typename U>
-    struct my_is_same : my_false_type {};
+    struct my_is_same : my_false_type {
+    };
 
     template<typename T>
-    struct my_is_same<T, T> : my_true_type {};
+    struct my_is_same<T, T> : my_true_type {
+    };
 
     template<
             class Key,
@@ -82,6 +84,7 @@ namespace sjtu {
         int siz;
 
         class iterator;
+
         class const_iterator;
 
         class iterator {
