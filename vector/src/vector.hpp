@@ -336,6 +336,18 @@ namespace sjtu {
             data = new_data;
         }
 
+        void halfSpace() {
+            _capacity >>= 1;
+            T *new_data = (T *) malloc(sizeof(T) * _capacity);
+            memset(new_data, 0, sizeof(T) * _capacity);
+            for (int i = 0; i < _size; i++) {
+                new_data[i] = data[i];
+                data[i].~T();
+            }
+            free(data);
+            data = new_data;
+        }
+
         /**
          * TODO Assignment operator
          */
@@ -520,6 +532,8 @@ namespace sjtu {
                 data[i] = data[i + 1];
             }
             data[--_size].~T();
+            if (_size < (_capacity >> 1)) halfSpace();
+            pos.head = data;
             return pos;
         }
 
@@ -536,6 +550,7 @@ namespace sjtu {
                 data[i] = data[i + 1];
             }
             data[--_size].~T();
+            if (_size < (_capacity >> 1)) halfSpace();
             return iterator(data, ind);
         }
 
@@ -559,6 +574,7 @@ namespace sjtu {
                 throw container_is_empty();
             }
             data[--_size].~T();
+            if (_size < (_capacity >> 1)) halfSpace();
         }
     };
 
